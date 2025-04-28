@@ -258,14 +258,14 @@ func main() {
 	// Start a goroutine to update the UI
 	go func() {
 		for {
-			// Update torrent progress
+			// Update torrent data (non-UI updates)
 			for _, item := range torrentList {
 				if item.Handle.Info() != nil {
 					item.Downloaded = item.Handle.BytesCompleted()
 					if item.Size > 0 {
 						item.Progress = float64(item.Downloaded) / float64(item.Size)
 					}
-
+	
 					// Update status
 					if item.Progress >= 1.0 {
 						item.Status = "Completed"
@@ -276,9 +276,12 @@ func main() {
 					}
 				}
 			}
-
-			// Refresh the list
-			list.Refresh()
+	
+			// Use fyne.CurrentApp().Driver().Run() to safely update UI from a goroutine
+			fyne.CurrentApp().Driver().Run(func() {
+				// Refresh the list on the main thread
+				list.Refresh()
+			})
 
 			// Sleep for a bit
 			time.Sleep(1 * time.Second)
