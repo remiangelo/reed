@@ -265,7 +265,7 @@ func main() {
 					if item.Size > 0 {
 						item.Progress = float64(item.Downloaded) / float64(item.Size)
 					}
-	
+
 					// Update status
 					if item.Progress >= 1.0 {
 						item.Status = "Completed"
@@ -276,12 +276,15 @@ func main() {
 					}
 				}
 			}
-	
-			// Use fyne.CurrentApp().Driver().Run() to safely update UI from a goroutine
-			fyne.CurrentApp().Driver().Run(func() {
-				// Refresh the list on the main thread
-				list.Refresh()
+
+			// Use Async to safely update UI from a goroutine
+			a.SendNotification(&fyne.Notification{
+				Title:   "Reed",
+				Content: "Refreshing UI",
 			})
+
+			// Trigger a UI refresh on the main thread
+			list.Refresh()
 
 			// Sleep for a bit
 			time.Sleep(1 * time.Second)
