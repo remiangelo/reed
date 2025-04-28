@@ -21,6 +21,10 @@ To run the Reed Torrent Client on Windows, you need to install the following pre
 
 These steps are required to build and run the application on Windows.
 
+TROUBLESHOOTING COMMON BUILD ERRORS:
+
+If you encounter linking errors related to pthread (multiple definition of pthread functions), this is a known issue with CGo on Windows. The project includes a gl_windows.go file that adds a linker flag to allow multiple definitions and resolve this issue. Make sure this file is present in your project directory before building.
+
 RUNNING FROM AN IDE:
 
 If you want to run the application from an IDE like GoLand or VS Code:

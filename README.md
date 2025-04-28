@@ -133,12 +133,31 @@ If you see errors related to `github.com/go-gl/gl`, try running:
 go get -u github.com/go-gl/gl/v3.2-core/gl
 ```
 
+If you encounter linking errors with pthread (multiple definition of pthread functions), this is a known issue with CGo on Windows. The project includes a `gl_windows.go` file that adds a linker flag to allow multiple definitions and resolve this issue. Make sure this file is present in your project directory before building.
+
 ## Usage
 
 1. Launch the application
 2. Enter a magnet link in the text field and click "Add Torrent" or click "Open File" to select a .torrent file
 3. The torrent will appear in the list and start downloading automatically
 4. To remove a torrent, select it from the list and click "Remove"
+
+## Creating a Standalone Executable
+
+If you want to create a standalone executable (.exe) file that can be run without installing Go or any dependencies:
+
+1. Follow the prerequisites installation steps for your platform (Windows, macOS, or Linux)
+2. Clone the repository and navigate to the project directory
+3. Run the provided build script:
+   ```
+   # On Windows
+   .\build_exe.bat
+   ```
+4. Once the build is complete, you'll have a standalone `reed.exe` file in the project directory
+5. You can double-click this file to run the application without needing to use the command line
+6. You can also create a shortcut to this file and place it on your desktop for easy access
+
+For detailed instructions on creating and using the executable, see the `exe_instructions.txt` file.
 
 ## Running from an IDE
 

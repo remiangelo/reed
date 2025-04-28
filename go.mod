@@ -5,6 +5,7 @@ go 1.24.2
 require (
 	fyne.io/fyne/v2 v2.6.0
 	github.com/anacrolix/torrent v1.58.1
+	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71
 )
 
 require (
@@ -42,7 +43,6 @@ require (
 	github.com/fyne-io/glfw-js v0.2.0 // indirect
 	github.com/fyne-io/image v0.1.1 // indirect
 	github.com/fyne-io/oksvg v0.1.0 // indirect
-	github.com/go-gl/gl v0.0.0-20231021071112-07e5d0ea2e71 // indirect
 	github.com/go-gl/glfw/v3.3/glfw v0.0.0-20240506104042-037f3cc74f2a // indirect
 	github.com/go-llsqlite/adapter v0.0.0-20230927005056-7f5ce7f0c916 // indirect
 	github.com/go-llsqlite/crawshaw v0.5.2-0.20240425034140-f30eb7704568 // indirect

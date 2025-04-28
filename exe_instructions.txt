@@ -1,0 +1,58 @@
+# Reed Torrent Client - Executable Instructions
+
+## Creating the Executable
+
+To create a standalone executable (.exe) file for the Reed Torrent Client, follow these steps:
+
+1. **Prerequisites**:
+   - You need to have Go installed (version 1.18 or later)
+   - You need GCC installed (via TDM-GCC or MSYS2)
+   - MSYS2 bin directory should be in your PATH (typically C:\msys64\mingw64\bin)
+
+2. **Build the Executable**:
+   - Double-click the `build_exe.bat` file in the project directory
+   - OR open a command prompt in the project directory and run `build_exe.bat`
+   - The script will install the Fyne CLI tool if needed and then package the application
+
+3. **Build Process**:
+   - The build process may take a few minutes
+   - When complete, you'll see a message: "Build complete! You can now run reed.exe by double-clicking it."
+   - The executable file `reed.exe` will be created in the project directory
+
+## Running the Executable
+
+Once the executable has been created, you can run it in one of the following ways:
+
+1. **Double-click** the `reed.exe` file in the project directory
+2. **Create a shortcut**:
+   - Right-click on `reed.exe` and select "Create shortcut"
+   - Move the shortcut to your desktop or another convenient location
+   - Double-click the shortcut to run the application
+
+## Distributing the Executable
+
+If you want to share the Reed Torrent Client with others:
+
+1. Copy the `reed.exe` file to a USB drive or share it via cloud storage
+2. The recipient can simply double-click the `reed.exe` file to run the application
+3. No installation is required - it's a standalone executable
+
+## Troubleshooting
+
+If you encounter issues when running the executable:
+
+1. **Missing DLLs**: If you see errors about missing DLL files, you may need to install the Visual C++ Redistributable package:
+   - Download and install from: https://aka.ms/vs/17/release/vc_redist.x64.exe
+
+2. **Windows Defender Warning**: Windows may display a warning when running the executable for the first time:
+   - Click "More info" and then "Run anyway" to proceed
+
+3. **Build Errors**: If the build process fails:
+   - Make sure you have all prerequisites installed (Go, GCC, MSYS2)
+   - Make sure MSYS2 bin directory is in your PATH
+   - Try running the commands from the batch file manually to see detailed error messages
+
+4. **Pthread Linking Errors**: If you see errors about multiple definitions of pthread functions:
+   - This is a known issue with CGo on Windows
+   - Make sure the `gl_windows.go` file is present in your project directory
+   - This file contains a special linker flag that allows multiple definitions and resolves the issue
