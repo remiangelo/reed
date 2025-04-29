@@ -8,7 +8,7 @@
   <g font-family="Segoe UI, sans-serif" font-weight="bold">
     <!-- Wave / Torrent Icon -->
     <path d="M10,40 Q20,20 30,40 T50,40 Q60,20 70,40" fill="none" stroke="url(#torrentGradient)" stroke-width="4"></path>
-    
+
     <!-- Reed text -->
     <text x="80" y="45" font-size="28" fill="#6c5ce7">Reed</text>
   </g>

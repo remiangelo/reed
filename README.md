@@ -3,52 +3,6 @@
 
 A GUI torrent client built with Go, using the [anacrolix/torrent](https://github.com/anacrolix/torrent) library and [Fyne](https://fyne.io/) for the user interface.
 
-## Quick Start
-
-### Windows
-1. Install [Go](https://golang.org/dl/) (version 1.18 or later)
-2. Install [GCC](https://jmeubank.github.io/tdm-gcc/) for Windows
-3. Install [MSYS2](https://www.msys2.org/)
-4. Open MSYS2 terminal and run:
-   ```
-   pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-pkg-config
-   ```
-5. Add MSYS2 bin to your PATH: `C:\msys64\mingw64\bin`
-6. Open Command Prompt and run:
-   ```
-   git clone https://github.com/your-username/reed.git
-   cd reed
-   go mod tidy
-   go get -u github.com/go-gl/gl/v3.2-core/gl
-   go build -o reed.exe
-   .\reed.exe
-   ```
-
-### macOS
-1. Install [Go](https://golang.org/dl/) and Xcode Command Line Tools
-2. Run:
-   ```
-   git clone https://github.com/your-username/reed.git
-   cd reed
-   go mod tidy
-   go build
-   ./reed
-   ```
-
-### Linux
-1. Install Go and required packages:
-   ```
-   sudo apt-get install gcc libgl1-mesa-dev xorg-dev
-   ```
-2. Run:
-   ```
-   git clone https://github.com/your-username/reed.git
-   cd reed
-   go mod tidy
-   go build
-   ./reed
-   ```
-
 ## Features
 
 - Add torrents via magnet links
@@ -89,7 +43,7 @@ Before building and running the application, you need to install the following d
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/reed.git
+   git clone https://github.com/remiangelo/reed.git
    cd reed
    ```
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"os"
 	"path/filepath"
@@ -10,6 +11,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
@@ -18,6 +20,118 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/anacrolix/torrent"
 )
+
+// ReedTheme is a modern, minimalist theme with light and dark mode support
+type ReedTheme struct {
+	fyne.Theme
+	isDark bool
+}
+
+// Color returns the color for the specified name and theme
+func (t *ReedTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	// Purple color scheme based on the Reed logo
+	primaryColor := color.NRGBA{R: 108, G: 92, B: 231, A: 255}       // #6c5ce7 from logo
+	lightPrimaryColor := color.NRGBA{R: 162, G: 155, B: 254, A: 255} // #a29bfe from logo
+
+	if t.isDark {
+		// Dark theme colors
+		switch name {
+		case theme.ColorNameBackground:
+			return color.NRGBA{R: 30, G: 30, B: 40, A: 255} // Dark background
+		case theme.ColorNameButton:
+			return primaryColor
+		case theme.ColorNameDisabled:
+			return color.NRGBA{R: 60, G: 60, B: 70, A: 255}
+		case theme.ColorNameForeground:
+			return color.NRGBA{R: 240, G: 240, B: 250, A: 255} // Light text
+		case theme.ColorNameHover:
+			return lightPrimaryColor
+		case theme.ColorNameInputBackground:
+			return color.NRGBA{R: 45, G: 45, B: 55, A: 255}
+		case theme.ColorNamePlaceHolder:
+			return color.NRGBA{R: 150, G: 150, B: 160, A: 255}
+		case theme.ColorNamePressed:
+			return color.NRGBA{R: 90, G: 80, B: 200, A: 255}
+		case theme.ColorNamePrimary:
+			return primaryColor
+		case theme.ColorNameScrollBar:
+			return color.NRGBA{R: 60, G: 60, B: 70, A: 255}
+		case theme.ColorNameShadow:
+			return color.NRGBA{R: 0, G: 0, B: 0, A: 80}
+		default:
+			return t.Theme.Color(name, variant)
+		}
+	} else {
+		// Light theme colors
+		switch name {
+		case theme.ColorNameBackground:
+			return color.NRGBA{R: 250, G: 250, B: 255, A: 255} // Light background
+		case theme.ColorNameButton:
+			return primaryColor
+		case theme.ColorNameDisabled:
+			return color.NRGBA{R: 200, G: 200, B: 210, A: 255}
+		case theme.ColorNameForeground:
+			return color.NRGBA{R: 30, G: 30, B: 40, A: 255} // Dark text
+		case theme.ColorNameHover:
+			return lightPrimaryColor
+		case theme.ColorNameInputBackground:
+			return color.NRGBA{R: 255, G: 255, B: 255, A: 255}
+		case theme.ColorNamePlaceHolder:
+			return color.NRGBA{R: 150, G: 150, B: 160, A: 255}
+		case theme.ColorNamePressed:
+			return color.NRGBA{R: 90, G: 80, B: 200, A: 255}
+		case theme.ColorNamePrimary:
+			return primaryColor
+		case theme.ColorNameScrollBar:
+			return color.NRGBA{R: 220, G: 220, B: 230, A: 255}
+		case theme.ColorNameShadow:
+			return color.NRGBA{R: 0, G: 0, B: 0, A: 40}
+		default:
+			return t.Theme.Color(name, variant)
+		}
+	}
+}
+
+// ToggleDarkMode switches between light and dark mode
+func (t *ReedTheme) ToggleDarkMode() {
+	t.isDark = !t.isDark
+}
+
+// Icon returns the appropriate icon for the iconName and variant
+func (t *ReedTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
+	return t.Theme.Icon(name)
+}
+
+// Font returns the font resource for the specified style and size
+func (t *ReedTheme) Font(style fyne.TextStyle) fyne.Resource {
+	return t.Theme.Font(style)
+}
+
+// Size returns the size for the specified name
+func (t *ReedTheme) Size(name fyne.ThemeSizeName) float32 {
+	switch name {
+	case theme.SizeNamePadding:
+		return 6 // Slightly more padding for a cleaner look
+	case theme.SizeNameInlineIcon:
+		return 20
+	case theme.SizeNameScrollBar:
+		return 8 // Thinner scrollbar
+	case theme.SizeNameScrollBarSmall:
+		return 4 // Even thinner small scrollbar
+	case theme.SizeNameText:
+		return 13 // Slightly larger text for better readability
+	case theme.SizeNameHeadingText:
+		return 18 // Larger heading text
+	case theme.SizeNameSubHeadingText:
+		return 15 // Larger subheading text
+	case theme.SizeNameCaptionText:
+		return 11 // Larger caption text
+	case theme.SizeNameSeparatorThickness:
+		return 1 // Thinner separators for a cleaner look
+	default:
+		return t.Theme.Size(name)
+	}
+}
 
 // TorrentItem represents a torrent in our UI
 type TorrentItem struct {
@@ -89,8 +203,13 @@ func HumanReadableRate(bytesPerSec int64) string {
 func main() {
 	// Create a new Fyne application with ID
 	a := app.NewWithID("com.github.reed.torrentclient")
+
+	// Create our custom theme with light mode as default
+	appTheme := &ReedTheme{Theme: theme.DefaultTheme(), isDark: false}
+	a.Settings().SetTheme(appTheme)
+
 	w := a.NewWindow("Reed Torrent Client")
-	w.Resize(fyne.NewSize(800, 600))
+	w.Resize(fyne.NewSize(1024, 768)) // Larger default size like Vuze
 
 	// Create a torrent client
 	cfg := torrent.NewDefaultClientConfig()
@@ -141,28 +260,51 @@ func main() {
 	// Variable to reference the add torrent dialog
 	var addTorrentDialog dialog.Dialog
 
-	// Torrent list widget
+	// Enhanced torrent list widget with Vuze-like styling
 	list := widget.NewList(
 		func() int {
 			return len(torrentList)
 		},
 		func() fyne.CanvasObject {
+			// Create a more modern, minimalist template
+			nameText := canvas.NewText("Torrent Name", color.NRGBA{R: 108, G: 92, B: 231, A: 255}) // Purple from logo
+			nameText.TextSize = 15
+			nameText.TextStyle = fyne.TextStyle{Bold: true}
+
+			progressBar := widget.NewProgressBar()
+			progressBar.Min = 0
+			progressBar.Max = 1
+
+			// Create a container with all the torrent information in a cleaner layout
 			return container.NewVBox(
-				container.NewHBox(
-					widget.NewIcon(theme.FileIcon()),
-					widget.NewLabel("Torrent Name"),
+				container.NewPadded(
+					container.NewHBox(
+						widget.NewIcon(theme.FileIcon()),
+						nameText,
+					),
 				),
-				widget.NewProgressBar(),
-				container.NewHBox(
-					widget.NewLabel("Status:"),
-					widget.NewLabel("Status"),
-					widget.NewSeparator(),
-					widget.NewLabel("Size:"),
-					widget.NewLabel("Size"),
-					widget.NewSeparator(),
-					widget.NewLabel("Speed:"),
-					widget.NewLabel("Speed"),
+				progressBar,
+				container.NewPadded(
+					container.NewGridWithColumns(4,
+						container.NewVBox(
+							widget.NewLabelWithStyle("Status", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+							widget.NewLabel("Status"),
+						),
+						container.NewVBox(
+							widget.NewLabelWithStyle("Size", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+							widget.NewLabel("Size"),
+						),
+						container.NewVBox(
+							widget.NewLabelWithStyle("Speed", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+							widget.NewLabel("Speed"),
+						),
+						container.NewVBox(
+							widget.NewLabelWithStyle("ETA", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+							widget.NewLabel("ETA"),
+						),
+					),
 				),
+				widget.NewSeparator(),
 			)
 		},
 		func(id widget.ListItemID, item fyne.CanvasObject) {
@@ -185,17 +327,22 @@ func main() {
 
 			// Safe type assertions with fallbacks
 			vbox, ok := item.(*fyne.Container)
-			if !ok || len(vbox.Objects) < 3 {
+			if !ok || len(vbox.Objects) < 4 {
 				return
 			}
 
-			// Top row with icon and name
-			hbox, ok := vbox.Objects[0].(*fyne.Container)
+			// Top row with icon and name (now inside a padded container)
+			paddedHBox, ok := vbox.Objects[0].(*fyne.Container)
+			if !ok || len(paddedHBox.Objects) < 1 {
+				return
+			}
+
+			hbox, ok := paddedHBox.Objects[0].(*fyne.Container)
 			if !ok || len(hbox.Objects) < 2 {
 				return
 			}
 
-			nameLabel, ok := hbox.Objects[1].(*widget.Label)
+			nameText, ok := hbox.Objects[1].(*canvas.Text)
 			if !ok {
 				return
 			}
@@ -206,40 +353,80 @@ func main() {
 				return
 			}
 
-			// Bottom row with stats
-			statsBox, ok := vbox.Objects[2].(*fyne.Container)
-			if !ok || len(statsBox.Objects) < 8 {
+			// Grid with stats (now inside a padded container)
+			paddedStatsGrid, ok := vbox.Objects[2].(*fyne.Container)
+			if !ok || len(paddedStatsGrid.Objects) < 1 {
 				return
 			}
 
-			statusLabel, ok := statsBox.Objects[1].(*widget.Label)
+			statsGrid, ok := paddedStatsGrid.Objects[0].(*fyne.Container)
+			if !ok || len(statsGrid.Objects) < 4 {
+				return
+			}
+
+			// Status column
+			statusBox, ok := statsGrid.Objects[0].(*fyne.Container)
+			if !ok || len(statusBox.Objects) < 2 {
+				return
+			}
+			statusLabel, ok := statusBox.Objects[1].(*widget.Label)
 			if !ok {
 				return
 			}
 
-			sizeLabel, ok := statsBox.Objects[4].(*widget.Label)
+			// Size column
+			sizeBox, ok := statsGrid.Objects[1].(*fyne.Container)
+			if !ok || len(sizeBox.Objects) < 2 {
+				return
+			}
+			sizeLabel, ok := sizeBox.Objects[1].(*widget.Label)
 			if !ok {
 				return
 			}
 
-			speedLabel, ok := statsBox.Objects[7].(*widget.Label)
+			// Speed column
+			speedBox, ok := statsGrid.Objects[2].(*fyne.Container)
+			if !ok || len(speedBox.Objects) < 2 {
+				return
+			}
+			speedLabel, ok := speedBox.Objects[1].(*widget.Label)
+			if !ok {
+				return
+			}
+
+			// ETA column
+			etaBox, ok := statsGrid.Objects[3].(*fyne.Container)
+			if !ok || len(etaBox.Objects) < 2 {
+				return
+			}
+			etaLabel, ok := etaBox.Objects[1].(*widget.Label)
 			if !ok {
 				return
 			}
 
 			// Set values safely
-			nameLabel.SetText(torrentItem.Name)
+			nameText.Text = torrentItem.Name
+			nameText.Refresh()
+
 			progressBar.Value = torrentItem.Progress
+
+			// Set status with color based on state
 			statusLabel.SetText(torrentItem.Status)
+
+			// Set size
 			sizeLabel.SetText(HumanReadableSize(torrentItem.Size))
 
+			// Set speed
 			if torrentItem.DownloadRate > 0 {
-				speedLabel.SetText(HumanReadableRate(torrentItem.DownloadRate))
+				speedLabel.SetText("↓ " + HumanReadableRate(torrentItem.DownloadRate))
 			} else if torrentItem.UploadRate > 0 {
 				speedLabel.SetText("↑ " + HumanReadableRate(torrentItem.UploadRate))
 			} else {
 				speedLabel.SetText("-")
 			}
+
+			// Set ETA
+			etaLabel.SetText(torrentItem.ETA)
 		},
 	)
 
@@ -248,11 +435,47 @@ func main() {
 		selectedIndex = int(id)
 	}
 
-	// Status bar for the bottom of the window (declared here so it can be accessed in the goroutine)
-	statusBar := container.NewHBox(
-		widget.NewLabel("Status: Ready"),
-		widget.NewSeparator(),
-		widget.NewLabel(fmt.Sprintf("Download Directory: %s", cfg.DataDir)),
+	// Enhanced status bar with more detailed information (like Vuze)
+	downloadSpeedLabel := widget.NewLabel("↓ 0 B/s")
+	uploadSpeedLabel := widget.NewLabel("↑ 0 B/s")
+	activeTorrentsLabel := widget.NewLabel("0 Active")
+	completedTorrentsLabel := widget.NewLabel("0 Complete")
+
+	// Create a more modern, minimalist status bar
+	statusText := widget.NewLabel("Ready")
+	statusText.Alignment = fyne.TextAlignLeading
+
+	// Create a container for the status indicators with some padding
+	statusIndicators := container.NewPadded(
+		container.NewHBox(
+			widget.NewIcon(theme.InfoIcon()),
+			statusText,
+			widget.NewSeparator(),
+			widget.NewIcon(theme.DownloadIcon()),
+			downloadSpeedLabel,
+			widget.NewSeparator(),
+			widget.NewIcon(theme.UploadIcon()),
+			uploadSpeedLabel,
+			widget.NewSeparator(),
+			activeTorrentsLabel,
+			widget.NewSeparator(),
+			completedTorrentsLabel,
+		),
+	)
+
+	// Create a container for the directory info with right alignment
+	dirInfo := container.NewPadded(
+		container.NewHBox(
+			layout.NewSpacer(),
+			widget.NewIcon(theme.FolderIcon()),
+			widget.NewLabel(cfg.DataDir),
+		),
+	)
+
+	// Combine the status indicators and directory info in a border layout
+	statusBar := container.NewBorder(
+		nil, nil, statusIndicators, dirInfo,
+		nil,
 	)
 
 	// Create a detail panel for the selected torrent
@@ -457,7 +680,12 @@ func main() {
 				}
 
 				// Read the torrent file
-				defer reader.Close()
+				defer func(reader fyne.URIReadCloser) {
+					err := reader.Close()
+					if err != nil {
+
+					}
+				}(reader)
 
 				// Get the file path from the URI
 				filePath := reader.URI().Path()
@@ -591,6 +819,11 @@ func main() {
 			confirmDialog.Show()
 		}),
 		widget.NewToolbarSpacer(),
+		widget.NewToolbarAction(theme.ColorPaletteIcon(), func() {
+			// Toggle between light and dark mode
+			appTheme.ToggleDarkMode()
+			a.Settings().SetTheme(appTheme)
+		}),
 		widget.NewToolbarAction(theme.SettingsIcon(), func() {
 			// Show settings dialog
 			dialog.ShowInformation("Settings", "Settings dialog will be implemented in a future update.", w)
@@ -603,13 +836,18 @@ func main() {
 
 	// The status bar is already declared above so we don't need to redeclare it here
 
-	// Function to update the details panel
+	// Function to update the details panel with a tabbed interface like Vuze
 	updateDetailsPanel = func() {
 		// Clear the container
 		detailsContainer.Objects = nil
 
 		if selectedIndex < 0 {
-			detailsContainer.Add(widget.NewLabel("No torrent selected"))
+			// Create a styled "no selection" message
+			noSelectionText := canvas.NewText("No torrent selected", color.NRGBA{R: 100, G: 100, B: 100, A: 255})
+			noSelectionText.TextSize = 16
+			noSelectionText.Alignment = fyne.TextAlignCenter
+
+			detailsContainer.Add(container.NewCenter(noSelectionText))
 			detailsContainer.Refresh()
 			return
 		}
@@ -631,126 +869,211 @@ func main() {
 		}
 
 		if selectedTorrent == nil {
-			detailsContainer.Add(widget.NewLabel("Torrent not found or none selected"))
+			errorText := canvas.NewText("Torrent not found or none selected", color.NRGBA{R: 200, G: 50, B: 50, A: 255})
+			errorText.TextSize = 16
+			errorText.Alignment = fyne.TextAlignCenter
+
+			detailsContainer.Add(container.NewCenter(errorText))
 			detailsContainer.Refresh()
 			return
 		}
 
 		// Additional safety check
 		if selectedTorrent.Handle == nil || selectedTorrent.Handle.Info() == nil {
-			detailsContainer.Add(widget.NewLabel("Torrent information not available yet"))
+			loadingText := canvas.NewText("Loading torrent information...", color.NRGBA{R: 100, G: 100, B: 100, A: 255})
+			loadingText.TextSize = 16
+			loadingText.Alignment = fyne.TextAlignCenter
+
+			detailsContainer.Add(container.NewCenter(loadingText))
 			detailsContainer.Refresh()
 			return
 		}
 
-		// Add torrent information to the details panel
-		detailsContainer.Add(widget.NewLabelWithStyle(
-			selectedTorrent.Name,
-			fyne.TextAlignLeading,
-			fyne.TextStyle{Bold: true},
-		))
+		// Add torrent title with styled text
+		titleText := canvas.NewText(selectedTorrent.Name, color.NRGBA{R: 66, G: 133, B: 244, A: 255})
+		titleText.TextSize = 18
+		titleText.TextStyle = fyne.TextStyle{Bold: true}
 
-		// Create a more detailed info form
-		infoForm := widget.NewForm(
-			widget.NewFormItem("Status", widget.NewLabel(selectedTorrent.Status)),
-			widget.NewFormItem("Size", widget.NewLabel(HumanReadableSize(selectedTorrent.Size))),
-			widget.NewFormItem("Downloaded", widget.NewLabel(HumanReadableSize(selectedTorrent.Downloaded))),
-			widget.NewFormItem("Progress", widget.NewLabel(fmt.Sprintf("%.1f%%", selectedTorrent.Progress*100))),
-			widget.NewFormItem("Download Speed", widget.NewLabel(HumanReadableRate(selectedTorrent.DownloadRate))),
-			widget.NewFormItem("Upload Speed", widget.NewLabel(HumanReadableRate(selectedTorrent.UploadRate))),
-			widget.NewFormItem("Peers", widget.NewLabel(fmt.Sprintf("%d", selectedTorrent.Peers))),
+		detailsContainer.Add(titleText)
+		detailsContainer.Add(widget.NewSeparator())
+
+		// Create action buttons with icons
+		actionsContainer := container.NewHBox(
+			widget.NewButtonWithIcon("Start", theme.MediaPlayIcon(), func() {
+				dialog.ShowInformation("Not Implemented", "Start functionality will be added soon.", w)
+			}),
+			widget.NewButtonWithIcon("Pause", theme.MediaPauseIcon(), func() {
+				dialog.ShowInformation("Not Implemented", "Pause functionality will be added soon.", w)
+			}),
+			widget.NewButtonWithIcon("Stop", theme.MediaStopIcon(), func() {
+				dialog.ShowInformation("Not Implemented", "Stop functionality will be added soon.", w)
+			}),
+			layout.NewSpacer(),
+			widget.NewButtonWithIcon("Open Folder", theme.FolderOpenIcon(), func() {
+				dialog.ShowInformation("Open Folder", "This will open the folder containing the downloaded files.", w)
+			}),
+		)
+		detailsContainer.Add(actionsContainer)
+		detailsContainer.Add(widget.NewSeparator())
+
+		// Create tabs for different types of information (like Vuze)
+
+		// General tab
+		generalTab := container.NewVBox()
+
+		// Create a more detailed info form with styled labels
+		infoGrid := container.NewGridWithColumns(2,
+			container.NewVBox(
+				widget.NewLabelWithStyle("Status:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(selectedTorrent.Status),
+			),
+			container.NewVBox(
+				widget.NewLabelWithStyle("Size:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(HumanReadableSize(selectedTorrent.Size)),
+			),
+			container.NewVBox(
+				widget.NewLabelWithStyle("Downloaded:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(HumanReadableSize(selectedTorrent.Downloaded)),
+			),
+			container.NewVBox(
+				widget.NewLabelWithStyle("Progress:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(fmt.Sprintf("%.1f%%", selectedTorrent.Progress*100)),
+			),
+			container.NewVBox(
+				widget.NewLabelWithStyle("Download Speed:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(HumanReadableRate(selectedTorrent.DownloadRate)),
+			),
+			container.NewVBox(
+				widget.NewLabelWithStyle("Upload Speed:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(HumanReadableRate(selectedTorrent.UploadRate)),
+			),
+			container.NewVBox(
+				widget.NewLabelWithStyle("Peers:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(fmt.Sprintf("%d", selectedTorrent.Peers)),
+			),
+			container.NewVBox(
+				widget.NewLabelWithStyle("Seeds:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(fmt.Sprintf("%d", selectedTorrent.Seeds)),
+			),
 		)
 
 		// Add ETA if downloading
 		if selectedTorrent.Progress < 1.0 && selectedTorrent.DownloadRate > 0 {
-			infoForm.Append("ETA", widget.NewLabel(selectedTorrent.ETA))
+			etaBox := container.NewVBox(
+				widget.NewLabelWithStyle("ETA:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				widget.NewLabel(selectedTorrent.ETA),
+			)
+			infoGrid.Add(etaBox)
 		}
 
 		// Add metadata info
-		infoForm.Append("Added", widget.NewLabel(selectedTorrent.AddedAt.Format("2006-01-02 15:04:05")))
-
-		// Calculate and show data transferred since added
-		if selectedTorrent.Downloaded > 0 {
-			infoForm.Append("Data Transferred", widget.NewLabel(HumanReadableSize(selectedTorrent.Downloaded)))
-		}
-		detailsContainer.Add(infoForm)
-
-		// Actions for this torrent
-		actionsContainer := container.NewHBox(
-			widget.NewButton("Pause/Resume", func() {
-				// Toggle pause/resume logic will be added later
-				dialog.ShowInformation("Not Implemented", "Pause/Resume functionality will be added soon.", w)
-			}),
-			widget.NewButton("Open Folder", func() {
-				// Open the download folder for this torrent
-				dialog.ShowInformation("Open Folder", "This will open the folder containing the downloaded files.", w)
-				// The actual implementation would be platform-specific
-			}),
+		addedBox := container.NewVBox(
+			widget.NewLabelWithStyle("Added:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+			widget.NewLabel(selectedTorrent.AddedAt.Format("2006-01-02 15:04:05")),
 		)
-		detailsContainer.Add(actionsContainer)
+		infoGrid.Add(addedBox)
+
+		generalTab.Add(infoGrid)
+
+		// Files tab
+		filesTab := container.NewVBox()
 
 		// If the torrent has files, show them
-		// Use multiple safety checks to prevent nil pointer dereferences
 		if selectedTorrent != nil && selectedTorrent.Handle != nil &&
-			selectedTorrent.Handle.Info() != nil &&
-			len(selectedTorrent.Handle.Info().Files) > 0 {
+			selectedTorrent.Handle.Info() != nil {
 
-			detailsContainer.Add(widget.NewLabelWithStyle("Files:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-
-			filesList := widget.NewList(
-				func() int {
-					// Double-check that info is still available (could change between renders)
-					if selectedTorrent != nil && selectedTorrent.Handle != nil &&
-						selectedTorrent.Handle.Info() != nil {
-						return len(selectedTorrent.Handle.Info().Files)
-					}
-					return 0
-				},
-				func() fyne.CanvasObject {
-					return container.NewHBox(
-						widget.NewIcon(theme.FileIcon()),
-						widget.NewLabel("Filename"),
-						widget.NewProgressBar(),
-						widget.NewLabel("Size"),
-					)
-				},
-				func(id widget.ListItemID, obj fyne.CanvasObject) {
-					// Safety checks
-					if selectedTorrent == nil || selectedTorrent.Handle == nil ||
-						selectedTorrent.Handle.Info() == nil ||
-						int(id) >= len(selectedTorrent.Handle.Info().Files) {
-						return
-					}
-
-					file := selectedTorrent.Handle.Info().Files[id]
-
-					hbox := obj.(*fyne.Container)
-					filenameLabel := hbox.Objects[1].(*widget.Label)
-					progressBar := hbox.Objects[2].(*widget.ProgressBar)
-					sizeLabel := hbox.Objects[3].(*widget.Label)
-
-					// Get the filename from the path - file.Path is a slice of strings
-					if len(file.Path) > 0 {
-						// Use the last component as the filename
-						filenameLabel.SetText(file.Path[len(file.Path)-1])
-					} else {
-						filenameLabel.SetText("Unknown file")
-					}
-					sizeLabel.SetText(HumanReadableSize(file.Length))
-					progressBar.Value = selectedTorrent.Progress
-				},
+			// Create a header for the files list
+			filesHeader := container.NewHBox(
+				widget.NewLabelWithStyle("Name", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+				layout.NewSpacer(),
+				widget.NewLabelWithStyle("Progress", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}),
+				widget.NewLabelWithStyle("Size", fyne.TextAlignTrailing, fyne.TextStyle{Bold: true}),
 			)
+			filesTab.Add(filesHeader)
+			filesTab.Add(widget.NewSeparator())
 
-			// Wrap the files list in a scroll container with fixed height
-			filesScroll := container.NewVScroll(filesList)
-			filesScroll.SetMinSize(fyne.NewSize(0, 150))
-			detailsContainer.Add(filesScroll)
-		} else if selectedTorrent.Handle.Info() != nil {
-			// Single file torrent
-			detailsContainer.Add(widget.NewLabelWithStyle("Single File:", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}))
-			detailsContainer.Add(widget.NewLabel(selectedTorrent.Name))
+			if len(selectedTorrent.Handle.Info().Files) > 0 {
+				// Multiple files
+				filesList := widget.NewList(
+					func() int {
+						// Double-check that info is still available
+						if selectedTorrent != nil && selectedTorrent.Handle != nil &&
+							selectedTorrent.Handle.Info() != nil {
+							return len(selectedTorrent.Handle.Info().Files)
+						}
+						return 0
+					},
+					func() fyne.CanvasObject {
+						return container.NewBorder(
+							nil, nil,
+							container.NewHBox(widget.NewIcon(theme.FileIcon())),
+							container.NewHBox(
+								widget.NewProgressBar(),
+								widget.NewLabel("Size"),
+							),
+							widget.NewLabel("Filename"),
+						)
+					},
+					func(id widget.ListItemID, obj fyne.CanvasObject) {
+						// Safety checks
+						if selectedTorrent == nil || selectedTorrent.Handle == nil ||
+							selectedTorrent.Handle.Info() == nil ||
+							int(id) >= len(selectedTorrent.Handle.Info().Files) {
+							return
+						}
+
+						file := selectedTorrent.Handle.Info().Files[id]
+
+						border := obj.(*fyne.Container)
+						filenameLabel := border.Objects[0].(*widget.Label)
+						rightContainer := border.Objects[1].(*fyne.Container)
+						progressBar := rightContainer.Objects[0].(*widget.ProgressBar)
+						sizeLabel := rightContainer.Objects[1].(*widget.Label)
+
+						// Get the filename from the path
+						if len(file.Path) > 0 {
+							// Use the last component as the filename
+							filenameLabel.SetText(file.Path[len(file.Path)-1])
+						} else {
+							filenameLabel.SetText("Unknown file")
+						}
+						sizeLabel.SetText(HumanReadableSize(file.Length))
+						progressBar.Value = selectedTorrent.Progress
+					},
+				)
+
+				// Wrap the files list in a scroll container
+				filesScroll := container.NewVScroll(filesList)
+				filesScroll.SetMinSize(fyne.NewSize(0, 200))
+				filesTab.Add(filesScroll)
+			} else {
+				// Single file torrent
+				filesTab.Add(widget.NewLabel(selectedTorrent.Name))
+				filesTab.Add(container.NewHBox(
+					widget.NewProgressBar(),
+					widget.NewLabel(HumanReadableSize(selectedTorrent.Size)),
+				))
+			}
+		} else {
+			filesTab.Add(widget.NewLabel("No file information available"))
 		}
 
+		// Peers tab (placeholder for now)
+		peersTab := container.NewVBox(
+			widget.NewLabelWithStyle("Peers", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+			widget.NewSeparator(),
+			widget.NewLabel(fmt.Sprintf("Connected to %d peers", selectedTorrent.Peers)),
+			widget.NewLabel("Detailed peer information will be implemented in a future update."),
+		)
+
+		// Create the tab container for details
+		detailsTabs := container.NewAppTabs(
+			container.NewTabItem("General", generalTab),
+			container.NewTabItem("Files", filesTab),
+			container.NewTabItem("Peers", peersTab),
+		)
+
+		detailsContainer.Add(detailsTabs)
 		detailsContainer.Refresh()
 	}
 
@@ -760,16 +1083,86 @@ func main() {
 		updateDetailsPanel()
 	}
 
-	// Create a split container with the list on the left and details on the right
-	splitContainer := container.NewHSplit(
-		container.NewVBox(list),
-		container.NewScroll(detailsContainer),
+	// Create a header with app logo and title
+	var header *fyne.Container
+
+	// Load the SVG logo
+	logoResource, err := fyne.LoadResourceFromPath("icon.svg")
+	if err != nil {
+		log.Printf("Error loading logo: %v", err)
+		// Fallback to text logo if SVG loading fails
+		headerLogo := canvas.NewText("REED", color.NRGBA{R: 108, G: 92, B: 231, A: 255}) // Purple from logo
+		headerLogo.TextSize = 24
+		headerLogo.TextStyle = fyne.TextStyle{Bold: true}
+
+		headerTitle := canvas.NewText("Torrent Client", color.NRGBA{R: 100, G: 100, B: 100, A: 255})
+		headerTitle.TextSize = 18
+
+		header = container.NewHBox(
+			headerLogo,
+			widget.NewLabel(" "),
+			headerTitle,
+			layout.NewSpacer(),
+		)
+	} else {
+		// Create an image with the SVG logo
+		logoImage := canvas.NewImageFromResource(logoResource)
+		logoImage.SetMinSize(fyne.NewSize(120, 36)) // Set appropriate size for the logo
+		logoImage.FillMode = canvas.ImageFillContain
+
+		header = container.NewHBox(
+			logoImage,
+			layout.NewSpacer(),
+		)
+	}
+
+	// Create a tabbed interface for different views (like Vuze)
+	// Library tab - contains the torrent list and details
+	libraryTab := container.NewBorder(
+		nil, nil, nil, nil,
+		container.NewHSplit(
+			container.NewVBox(
+				// Enhanced torrent list with category header
+				container.NewVBox(
+					container.NewHBox(
+						widget.NewLabelWithStyle("Library", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+						layout.NewSpacer(),
+						widget.NewLabel(fmt.Sprintf("%d Torrents", len(torrentList))),
+					),
+					widget.NewSeparator(),
+					container.NewVBox(list),
+				),
+			),
+			container.NewScroll(detailsContainer),
+		),
 	)
-	splitContainer.Offset = 0.7 // 70% of space for the list, 30% for details
+
+	// Files tab - will show all files across torrents
+	filesTab := container.NewVBox(
+		widget.NewLabelWithStyle("All Files", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewSeparator(),
+		widget.NewLabel("Files view will be implemented in a future update."),
+	)
+
+	// Stats tab - will show statistics
+	statsTab := container.NewVBox(
+		widget.NewLabelWithStyle("Statistics", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
+		widget.NewSeparator(),
+		widget.NewLabel("Statistics view will be implemented in a future update."),
+	)
+
+	// Create the tab container
+	mainTabs := container.NewAppTabs(
+		container.NewTabItem("Library", libraryTab),
+		container.NewTabItem("Files", filesTab),
+		container.NewTabItem("Statistics", statsTab),
+	)
+	mainTabs.SetTabLocation(container.TabLocationTop)
 
 	// Create the main layout with the toolbar at the top
 	content := container.NewBorder(
 		container.NewVBox(
+			header,
 			toolbar,
 			widget.NewSeparator(),
 		),
@@ -779,7 +1172,7 @@ func main() {
 		),
 		nil,
 		nil,
-		splitContainer,
+		mainTabs,
 	)
 
 	// Set the window content
@@ -944,21 +1337,22 @@ func main() {
 					}
 				}
 
-				// Update status bar text
-				if statusBar != nil && len(statusBar.Objects) > 0 {
-					statusLabel, ok := statusBar.Objects[0].(*widget.Label)
-					if ok && statusLabel != nil {
-						if activeDownloads > 0 {
-							statusLabel.SetText(fmt.Sprintf("Status: Downloading %d torrent(s) at %s, %d completed",
-								activeDownloads, HumanReadableRate(totalDownloadRate), completedDownloads))
-						} else if len(torrentList) > 0 {
-							statusLabel.SetText(fmt.Sprintf("Status: All downloads complete (%d torrents)",
-								len(torrentList)))
-						} else {
-							statusLabel.SetText("Status: Ready")
-						}
-					}
+				// Update the status text directly using the variables we created earlier
+				if activeDownloads > 0 {
+					statusText.SetText("Downloading")
+				} else if len(torrentList) > 0 {
+					statusText.SetText("Idle")
+				} else {
+					statusText.SetText("Ready")
 				}
+
+				// Update the speed labels
+				downloadSpeedLabel.SetText("↓ " + HumanReadableRate(totalDownloadRate))
+				uploadSpeedLabel.SetText("↑ " + HumanReadableRate(totalUploadRate))
+
+				// Update the torrent count labels
+				activeTorrentsLabel.SetText(fmt.Sprintf("%d Active", activeDownloads))
+				completedTorrentsLabel.SetText(fmt.Sprintf("%d Complete", completedDownloads))
 
 				// Refresh UI components
 				if list != nil {
