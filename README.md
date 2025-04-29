@@ -1,5 +1,5 @@
 # Reed Torrent Client
-<img src="reed-logo.svg" alt="Reed Logo" width="300"/>
+<img src="icon.svg" alt="Reed Logo" width="300"/>
 
 A GUI torrent client built with Go, using the [anacrolix/torrent](https://github.com/anacrolix/torrent) library and [Fyne](https://fyne.io/) for the user interface.
 
