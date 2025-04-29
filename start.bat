@@ -1,0 +1,3 @@
+@echo off
+echo Starting Reed Torrent Client...
+start /b reed.exe
