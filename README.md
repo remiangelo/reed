@@ -6,6 +6,7 @@ A GUI torrent client built with Go, using the [anacrolix/torrent](https://github
 ## Quick Start
 
 ### Windows
+<summary>
 1. Install [Go](https://golang.org/dl/) (version 1.18 or later)
 2. Install [GCC](https://jmeubank.github.io/tdm-gcc/) for Windows
 3. Install [MSYS2](https://www.msys2.org/)
@@ -23,8 +24,10 @@ A GUI torrent client built with Go, using the [anacrolix/torrent](https://github
    go build -o reed.exe
    .\reed.exe
    ```
+</summary>
 
 ### macOS
+<summary>
 1. Install [Go](https://golang.org/dl/) and Xcode Command Line Tools
 2. Run:
    ```
@@ -34,8 +37,11 @@ A GUI torrent client built with Go, using the [anacrolix/torrent](https://github
    go build
    ./reed
    ```
+</summary>
+
 
 ### Linux
+<summary>
 1. Install Go and required packages:
    ```
    sudo apt-get install gcc libgl1-mesa-dev xorg-dev
@@ -48,6 +54,7 @@ A GUI torrent client built with Go, using the [anacrolix/torrent](https://github
    go build
    ./reed
    ```
+</summary>
 
 ## Features
 
