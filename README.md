@@ -1,4 +1,5 @@
 # Reed Torrent Client
+<img src="reed-logo.svg" alt="Reed Logo" width="300"/>
 
 A GUI torrent client built with Go, using the [anacrolix/torrent](https://github.com/anacrolix/torrent) library and [Fyne](https://fyne.io/) for the user interface.
 
@@ -141,51 +142,6 @@ If you encounter linking errors with pthread (multiple definition of pthread fun
 2. Enter a magnet link in the text field and click "Add Torrent" or click "Open File" to select a .torrent file
 3. The torrent will appear in the list and start downloading automatically
 4. To remove a torrent, select it from the list and click "Remove"
-
-## Creating a Standalone Executable
-
-If you want to create a standalone executable (.exe) file that can be run without installing Go or any dependencies:
-
-1. Follow the prerequisites installation steps for your platform (Windows, macOS, or Linux)
-2. Clone the repository and navigate to the project directory
-3. Run the provided build script:
-   ```
-   # On Windows
-   .\build_exe.bat
-   ```
-4. Once the build is complete, you'll have a standalone `reed.exe` file in the project directory
-5. You can double-click this file to run the application without needing to use the command line
-6. You can also create a shortcut to this file and place it on your desktop for easy access
-
-For detailed instructions on creating and using the executable, see the `exe_instructions.txt` file.
-
-## Running from an IDE
-
-### GoLand
-1. Open GoLand and select "Open" to open the reed project folder
-2. Make sure all prerequisites are installed (Go, GCC, MSYS2 on Windows)
-3. In the Project view, right-click on `main.go` and select "Run 'main.go'"
-4. If you encounter build errors:
-   - Go to File > Settings > Go > GOPATH
-   - Ensure your GOPATH is correctly set
-   - For Windows users, make sure your PATH includes MSYS2 bin directory
-   - Try running `go get -u github.com/go-gl/gl/v3.2-core/gl` in the terminal
-
-### Visual Studio Code
-1. Open VS Code and select "Open Folder" to open the reed project folder
-2. Install the Go extension if you haven't already
-3. Open `main.go` and click the "Run" button above the `main` function, or press F5
-4. If you encounter build errors:
-   - Open a terminal in VS Code and run `go get -u github.com/go-gl/gl/v3.2-core/gl`
-   - Make sure your PATH includes MSYS2 bin directory (on Windows)
-   - Verify that all prerequisites are installed
-
-### Other IDEs
-For other IDEs, the general steps are:
-1. Open the project folder in your IDE
-2. Make sure all prerequisites are installed
-3. Configure your IDE to use the correct GOPATH
-4. Run `main.go`
 
 ## Development
 
