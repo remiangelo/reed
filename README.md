@@ -7,15 +7,15 @@ A GUI torrent client built with Go, using the [anacrolix/torrent](https://github
 
 ### Windows
 <details>
-1. Install [Go](https://golang.org/dl/) (version 1.18 or later)
-2. Install [GCC](https://jmeubank.github.io/tdm-gcc/) for Windows
-3. Install [MSYS2](https://www.msys2.org/)
-4. Open MSYS2 terminal and run:
+   1. Install [Go](https://golang.org/dl/) (version 1.18 or later)
+   2. Install [GCC](https://jmeubank.github.io/tdm-gcc/) for Windows
+   3. Install [MSYS2](https://www.msys2.org/)
+   4. Open MSYS2 terminal and run:
    ```
    pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-pkg-config
    ```
-5. Add MSYS2 bin to your PATH: `C:\msys64\mingw64\bin`
-6. Open Command Prompt and run:
+   5. Add MSYS2 bin to your PATH: `C:\msys64\mingw64\bin`
+   6. Open Command Prompt and run:
    ```
    git clone https://github.com/your-username/reed.git
    cd reed
